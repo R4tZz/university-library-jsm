@@ -1,15 +1,15 @@
 "use server";
 
-import { signIn } from "@/auth";
+import { eq } from "drizzle-orm";
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
 import { hash } from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { signIn } from "@/auth";
 import { headers } from "next/headers";
-import ratelimit from "../ratelimit";
+import ratelimit from "@/lib/ratelimit";
 import { redirect } from "next/navigation";
-import { workflowClient } from "../workflow";
-import config from "../config";
+import { workflowClient } from "@/lib/workflow";
+import config from "@/lib/config";
 
 export const signInWithCredentials = async (
   params: Pick<AuthCredentials, "email" | "password">,
@@ -35,9 +35,10 @@ export const signInWithCredentials = async (
     return { success: true };
   } catch (error) {
     console.log(error, "Signin error");
-    return { success: false, error: "Signin error!" };
+    return { success: false, error: "Signin error" };
   }
 };
+
 export const signUp = async (params: AuthCredentials) => {
   const { fullName, email, universityId, password, universityCard } = params;
 
@@ -51,10 +52,13 @@ export const signUp = async (params: AuthCredentials) => {
     .from(users)
     .where(eq(users.email, email))
     .limit(1);
+
   if (existingUser.length > 0) {
-    return { success: false, error: "User already exists!" };
+    return { success: false, error: "User already exists" };
   }
+
   const hashedPassword = await hash(password, 10);
+
   try {
     await db.insert(users).values({
       fullName,
@@ -73,9 +77,11 @@ export const signUp = async (params: AuthCredentials) => {
     });
 
     await signInWithCredentials({ email, password });
+
     return { success: true };
   } catch (error) {
+    console.error(error);
     console.log(error, "Signup error");
-    return { success: false, error: "Signup error!" };
+    return { success: false, error: "Signup error" };
   }
 };
