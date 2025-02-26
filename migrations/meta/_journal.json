@@ -15,6 +15,13 @@
       "when": 1740344765210,
       "tag": "0001_strong_jack_murdock",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1740608347882,
+      "tag": "0002_naive_human_fly",
+      "breakpoints": true
     }
   ]
 }
