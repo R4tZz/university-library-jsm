@@ -1,13 +1,13 @@
-import { auth } from "@/auth";
+import { ReactNode } from "react";
 import Header from "@/components/Header";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import React, { ReactNode } from "react";
 import { after } from "next/server";
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
 import { eq } from "drizzle-orm";
 
-const layout = async ({ children }: { children: ReactNode }) => {
+const Layout = async ({ children }: { children: ReactNode }) => {
   const session = await auth();
 
   if (!session) redirect("/sign-in");
@@ -15,7 +15,6 @@ const layout = async ({ children }: { children: ReactNode }) => {
   after(async () => {
     if (!session?.user?.id) return;
 
-    // get the user and see if the last acitivity date is today
     const user = await db
       .select()
       .from(users)
@@ -35,10 +34,11 @@ const layout = async ({ children }: { children: ReactNode }) => {
     <main className="root-container">
       <div className="mx-auto max-w-7xl">
         <Header session={session} />
-        <div className="mt-20 pb-20"> {children} </div>
+
+        <div className="mt-20 pb-20">{children}</div>
       </div>
     </main>
   );
 };
 
-export default layout;
+export default Layout;
